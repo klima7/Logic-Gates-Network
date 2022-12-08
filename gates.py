@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 
 import operations as ops
@@ -10,16 +12,22 @@ class Gate:
     def __init__(self, input_size):
         self.input_size = input_size
 
-        self.neg1 = 0
-        self.neg2 = 0
-        self.arg1 = 0
-        self.arg2 = 0
-        self.op = 0
+        self.neg1 = random.randint(0, 1)
+        self.neg2 = random.randint(0, 1)
+        self.arg1 = random.randint(0, input_size-1)
+        self.arg2 = random.randint(0, input_size-1)
+        self.op = random.randint(0, len(self.OPERATIONS)-1)
 
     def predict(self, inputs):
-        arg1 = -1 * self.neg1 * inputs[self.arg1]
-        arg2 = -1 * self.neg2 * inputs[self.arg2]
         op = self.OPERATIONS[self.op]
+        arg1 = inputs[self.arg1]
+        arg2 = inputs[self.arg2]
+
+        if self.neg1:
+            arg1 = not arg1
+        if self.neg2:
+            arg1 = not arg2
+
         return op(arg1, arg2)
 
     def get_params(self):
@@ -76,7 +84,7 @@ class Network:
         for layer in self.layers:
             current_inputs = layer.predict(current_inputs)
 
-        return current_inputs
+        return current_inputs[0]
 
     def get_params(self):
         nested_params = np.array([layer.get_params() for layer in self.layers])
@@ -98,7 +106,7 @@ class Network:
     @staticmethod
     def __create_layers(input_size, hidden_layers_sizes):
         layers = []
-        all_sizes = [input_size, *hidden_layers_sizes]
+        all_sizes = [input_size, *hidden_layers_sizes, 1]
         for input_size, gates_count in zip(all_sizes, all_sizes[1:]):
             layer = Layer(size=gates_count, input_size=input_size)
             layers.append(layer)
