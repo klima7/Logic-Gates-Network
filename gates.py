@@ -87,9 +87,9 @@ class Network:
         return current_inputs[0]
 
     def get_params(self):
-        nested_params = np.array([layer.get_params() for layer in self.layers])
-        params = nested_params.flatten()
-        return params
+        nested_params = [layer.get_params() for layer in self.layers]
+        params = [item for sublist in nested_params for item in sublist]
+        return np.array(params)
 
     def set_params(self, params):
         remaining_params = list(params)
@@ -99,9 +99,9 @@ class Network:
             layer.set_params(params)
 
     def get_max_params(self):
-        nested_params = np.array([layer.get_max_params() for layer in self.layers])
-        params = nested_params.flatten()
-        return params
+        nested_params = [layer.get_max_params() for layer in self.layers]
+        params = [item for sublist in nested_params for item in sublist]
+        return np.array(params)
 
     @staticmethod
     def __create_layers(input_size, hidden_layers_sizes):
