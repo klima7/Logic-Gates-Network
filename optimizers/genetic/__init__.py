@@ -1,1 +1,2 @@
-from .components import RouletteWheelSelection, RankSelection, NRandomChangesMutation, MultiPointCrossing, SmallestMaeFitness
+from .components import RouletteWheelSelection, RankSelection, NRandomChangesMutation, MultiPointCrossing, \
+    HighestAccuracyFitness, LowestMseFitness

@@ -1,3 +1,4 @@
+import math
 from abc import ABC, abstractmethod
 
 import numpy as np
@@ -60,7 +61,7 @@ class NRandomChangesMutation(BaseMutation):
         indexes = np.arange(len(chromosome))
         np.random.shuffle(indexes)
         indexes = indexes[:self.n_changes]
-        chromosome[indexes] = np.random.randint(low=0, size=(self.n_changes,)) % (max_params[indexes] + 1)
+        chromosome[indexes] = np.random.randint(low=0, high=1_000_000, size=(self.n_changes,)) % (max_params[indexes] + 1)
         return chromosome
 
 
@@ -85,10 +86,16 @@ class MultiPointCrossing(BaseCrossing):
         return first_child, second_child
 
 
-class SmallestMaeFitness(BaseFitness):
+class HighestAccuracyFitness(BaseFitness):
 
     def __call__(self, network, inputs, outputs):
-        predictions = network.predict(inputs)
-        error = np.sum(predictions ^ outputs) / len(inputs)
-        fitness = 1 / error
+        return network.evaluate(inputs, outputs)
+
+
+class LowestMseFitness(BaseFitness):
+
+    def __call__(self, network, inputs, outputs):
+        accuracy = network.evaluate(inputs, outputs)
+        mae = 1.0 - accuracy
+        fitness = 1.0 / mae if mae != 0 else math.inf
         return fitness

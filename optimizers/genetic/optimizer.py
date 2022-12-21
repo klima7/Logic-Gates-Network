@@ -51,6 +51,8 @@ class GeneticOptimizer:
         self.inputs = inputs
         self.outputs = outputs
 
+        print(f'Optimizing {len(self.max_params)} parameters')
+
         self._generate_population()
         self._update_fitnesses()
         self._order_by_fitness()
@@ -63,9 +65,12 @@ class GeneticOptimizer:
         iterator = tqdm(range(self.n_generations), total=self.n_generations, desc='Evolution')
         for _ in iterator:
             self._evolve()
-            iterator.set_postfix_str(f'best fitness: {self.fitnesses[0]}')
+            accuracy = self.network.evaluate(self.inputs, self.outputs)
+            iterator.set_postfix_str(f'fitness: {self.fitnesses[0]}, accuracy: {accuracy:.3f}')
 
             # -------early-stopping-handling-------- #
+            if self.fitnesses[0] == math.inf:
+                break
             if self.fitnesses[0] > best_fitness:
                 best_fitness = self.fitnesses[0]
                 generations_without_change = 0
@@ -78,7 +83,7 @@ class GeneticOptimizer:
         self.network.set_params(self.genotypes[0])
 
     def _generate_population(self):
-        random = np.random.randint(low=0, size=(self.n_chromosomes, len(self.max_params)))
+        random = np.random.randint(low=0, high=1_000_000, size=(self.n_chromosomes, len(self.max_params)))
         population = random % (self.max_params+1)
         self.genotypes = population
 
