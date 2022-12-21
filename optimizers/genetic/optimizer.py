@@ -65,6 +65,7 @@ class GeneticOptimizer:
         iterator = tqdm(range(self.n_generations), total=self.n_generations, desc='Evolution')
         for _ in iterator:
             self._evolve()
+            self.network.set_params(self.genotypes[0])
             accuracy = self.network.evaluate(self.inputs, self.outputs)
             iterator.set_postfix_str(f'fitness: {self.fitnesses[0]}, accuracy: {accuracy:.3f}')
 
