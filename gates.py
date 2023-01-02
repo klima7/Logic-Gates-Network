@@ -75,9 +75,9 @@ class Network:
 
     def evaluate(self, inputs, outputs):
         predictions = self.predict(inputs)
-        success_count = np.sum(predictions == outputs)
-        accuracy = success_count / len(inputs)
-        return accuracy
+        loss = self.__get_loss(predictions, outputs)
+        accuracy = self.__get_accuracy(predictions, outputs)
+        return loss, accuracy
 
     def predict(self, multiple_inputs):
         outputs = [self.predict_single(single_inputs) for single_inputs in multiple_inputs]
@@ -85,12 +85,10 @@ class Network:
 
     def predict_single(self, inputs):
         assert len(inputs) == self.input_size
-
         current_inputs = inputs
         for layer in self.layers:
             current_inputs = layer.predict(current_inputs)
-
-        return current_inputs[0]
+        return current_inputs
 
     def get_params(self):
         nested_params = [layer.get_params() for layer in self.layers]
@@ -112,8 +110,22 @@ class Network:
     @staticmethod
     def __create_layers(input_size, hidden_layers_sizes):
         layers = []
-        all_sizes = [input_size, *hidden_layers_sizes, 1]
+        all_sizes = [input_size, *hidden_layers_sizes]
         for input_size, gates_count in zip(all_sizes, all_sizes[1:]):
             layer = Layer(size=gates_count, input_size=input_size)
             layers.append(layer)
         return layers
+
+    @staticmethod
+    def __get_accuracy(predictions, targets):
+        predictions, targets = predictions > 0.5, targets > 0.5
+        correct_count = np.sum(np.all(predictions == targets, axis=1))
+        total_count = len(targets)
+        return correct_count / total_count if total_count != 0 else 0
+
+    @staticmethod
+    def __get_loss(predictions, targets):
+        predictions, targets = predictions.astype(np.float64), targets.astype(np.float64)
+        partial_losses = np.mean(np.power(targets - predictions, 2), axis=1)
+        mean_loss = np.mean(partial_losses)
+        return mean_loss

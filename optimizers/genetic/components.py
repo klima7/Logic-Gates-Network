@@ -89,13 +89,11 @@ class MultiPointCrossing(BaseCrossing):
 class HighestAccuracyFitness(BaseFitness):
 
     def __call__(self, network, inputs, outputs):
-        return network.evaluate(inputs, outputs)
+        return network.evaluate(inputs, outputs)[1]
 
 
 class LowestMseFitness(BaseFitness):
 
     def __call__(self, network, inputs, outputs):
-        accuracy = network.evaluate(inputs, outputs)
-        mae = 1.0 - accuracy
-        fitness = 1.0 / mae if mae != 0 else math.inf
-        return fitness
+        mse = network.evaluate(inputs, outputs)[0]
+        return 1 / mse if mse != 0 else math.inf
